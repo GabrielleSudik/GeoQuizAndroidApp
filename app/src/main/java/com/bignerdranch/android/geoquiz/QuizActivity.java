@@ -1,20 +1,43 @@
+//this file is a controller
+
 package com.bignerdranch.android.geoquiz;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class QuizActivity extends AppCompatActivity {
 
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mNextButton;
+    private TextView mQuestionTextView;
+
+    //this is a way to populate the array of questions
+    //not best solution for very long arrays/lists.
+    private Question[] mQuestionBank = new Question[]{
+            new Question(R.string.question_australia, true),
+            new Question(R.string.question_oceans, true),
+            new Question(R.string.question_mideast, false),
+            new Question(R.string.question_africa, false),
+            new Question(R.string.question_americas, true),
+            new Question(R.string.question_asia, true)
+            //textbook showed a comma after the last line, but I think that's wrong?
+            //I tried putting it in, didn't get an error.
+    };
+
+    private int mCurrentIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
+        mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
+        int question = mQuestionBank[mCurrentIndex].getTextResId();
+        mQuestionTextView.setText(question);
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
