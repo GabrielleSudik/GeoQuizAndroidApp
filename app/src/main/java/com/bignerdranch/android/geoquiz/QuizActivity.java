@@ -8,9 +8,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.Log;
 
 public class QuizActivity extends AppCompatActivity {
 
+    //the next line is to log changes in the status:
+    //this is for lesson 4 and I don't think it's usually used:
+    private static final String TAG = "QuizActivity";
+    //next line part of fixing the rotation reset bug:
+    private static final String KEY_INDEX = "index";
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mNextButton;
@@ -34,12 +40,14 @@ public class QuizActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //next line is for logging status:
+        Log.d(TAG, "onCreate(Bundle)called");
         setContentView(R.layout.activity_quiz);
+        //next block added to save state when re-created on rotation:
+        if (savedInstanceState != null){
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+        }
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
-        //int question = mQuestionBank[mCurrentIndex].getTextResId();
-        //mQuestionTextView.setText(question);
-
-        //add a listener to TextView:
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -52,33 +60,24 @@ public class QuizActivity extends AppCompatActivity {
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
-                //Toast.makeText(QuizActivity.this,
-                       // R.string.correct_toast,
-                       // Toast.LENGTH_SHORT).show();
-                //those lines changed to a method below
+            public void onClick(View v) {
                 checkAnswer(true);
             }
         });
         mFalseButton = (Button) findViewById(R.id.false_button);
         mFalseButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
-                //Toast.makeText(QuizActivity.this,
-                       // R.string.incorrect_toast,
-                       // Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
                 checkAnswer(false);
             }
         });
 
         //move to next question button:
-        mNextButton = (Button)findViewById(R.id.next_button);
+        mNextButton = (Button) findViewById(R.id.next_button);
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mCurrentIndex = (mCurrentIndex + 1)%mQuestionBank.length;
-                //int question = mQuestionBank[mCurrentIndex].getTextResId();
-                //mQuestionTextView.setText(question);
+                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
                 updateQuestion();
             }
         });
@@ -86,26 +85,69 @@ public class QuizActivity extends AppCompatActivity {
         updateQuestion();
     }
 
-    //fyi you originally wrote the same code twice above.
-    //it's more efficient to write it once in a method, here.
-    private void updateQuestion(){
+    //lesson 4 override codes start here
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Log.d(TAG, "onStart() called");
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d(TAG, "onResume() called");
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.d(TAG, "onPause() called");
+    }
+    //when i first wrote this code, it was definitely "public"
+    // later, the book quotes this block as being "protected". typo??
+
+    //to save state when re-created due to screen rotation:
+    //note the non-override method above is protected, although the text in chapt 3 says public
+    //tinker with those if you have problems
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        Log.i(TAG, "onSavedInstanceState");
+        savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        Log.d(TAG, "onStop() called");
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.d(TAG, "onDestroy() called");
+    }
+
+    //moves to next question in array:
+    private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
     }
 
     //check answers:
-    private void checkAnswer(boolean userPressedTrue){
+    private void checkAnswer(boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
 
         int messageResId = 0;
 
-        if(userPressedTrue == answerIsTrue){
+        if (userPressedTrue == answerIsTrue) {
             messageResId = R.string.correct_toast;
         } else {
             messageResId = R.string.incorrect_toast;
         }
 
-        Toast.makeText(this, messageResId,Toast.LENGTH_SHORT)
+        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
                 .show();
     }
 }
